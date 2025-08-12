@@ -1,0 +1,13 @@
+:root { --bg:#0b0d10; --fg:#e6ecf1; --muted:#9fb3c8; --card:#141821; --accent:#7cc6ff; }
+*{ box-sizing:border-box; }
+body{ margin:0; font-family:Inter,system-ui,Segoe UI,Arial; background:var(--bg); color:var(--fg);}
+main{ max-width:900px; margin:40px auto; padding:0 16px; }
+h1{ margin-bottom:12px; }
+label{ display:block; margin:8px 0; color:var(--muted);}
+input,textarea{ width:100%; padding:10px; border-radius:10px; border:1px solid #202733; background:#0f131a; color:var(--fg);}
+button{ background:var(--accent); border:none; color:#001625; padding:10px 14px; border-radius:10px; cursor:pointer; }
+.row{ display:flex; gap:12px; }
+.card{ background:var(--card); padding:12px; border-radius:14px; margin:12px 0; }
+.card-head{ display:flex; justify-content:space-between; align-items:center; }
+.card-actions{ display:flex; gap:10px; margin:8px 0 6px; }
+details pre{ white-space:pre-wrap; }
