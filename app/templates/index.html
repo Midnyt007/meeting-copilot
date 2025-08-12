@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Meeting Copilot</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Meeting Copilot</h1>
+      <form id="create-form">
+        <div class="row">
+          <label>Title <input name="title" required placeholder="Weekly Sync" /></label>
+          <label>Date <input name="date" type="date" required /></label>
+        </div>
+        <label>Attendees <input name="attendees" placeholder="Alice, Bob" /></label>
+        <label>Notes</label>
+        <textarea name="notes" rows="10" placeholder="Paste transcript or notes..."></textarea>
+        <button>Create Meeting</button>
+      </form>
+
+      <section>
+        <h2>Recent Meetings</h2>
+        <div id="meetings"></div>
+      </section>
+    </main>
+
+    <script>
+      async function fetchMeetings() {
+        const r = await fetch('/api/meetings');
+        const data = await r.json();
+        const box = document.getElementById('meetings');
+        box.innerHTML = '';
+        for (const m of data) {
+          const div = document.createElement('div');
+          div.className = 'card';
+          div.innerHTML = `
+            <div class="card-head">
+              <strong>${m.title}</strong>
+              <span>${m.date}</span>
+            </div>
+            <div class="card-actions">
+              <button data-id="${m.id}" class="summ">Summarize</button>
+              <a href="/api/report/${m.id}.md" target="_blank">Markdown</a>
+            </div>
+            <details>
+              <summary>Notes</summary>
+              <pre>${m.notes.replace(/</g,'&lt;')}</pre>
+            </details>
+          `;
+          box.appendChild(div);
+        }
+        for (const b of document.querySelectorAll('button.summ')) {
+          b.addEventListener('click', async () => {
+            const id = b.getAttribute('data-id');
+            const r = await fetch(`/api/summarize/${id}`, { method: 'POST' });
+            const js = await r.json();
+            alert('Summary ready. Action items: ' + js.summary.action_items.length);
+          });
+        }
+      }
+
+      document.getElementById('create-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const payload = {
+          title: fd.get('title'),
+          date: fd.get('date'),
+          attendees: String(fd.get('attendees')||'').split(',').map(s=>s.trim()).filter(Boolean),
+          notes: fd.get('notes')
+        };
+        await fetch('/api/notes', { method: 'POST', headers: { 'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
+        await fetchMeetings();
+        e.target.reset();
+      });
+
+      fetchMeetings();
+    </script>
+  </body>
+</html>
